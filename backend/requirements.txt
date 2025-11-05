@@ -3,6 +3,6 @@ uvicorn
 torch
 torchvision
 pillow
-python-multipart
 numpy
+python-multipart
 opencv-python
