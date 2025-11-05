@@ -1,15 +1,4 @@
-﻿# Python venv and data
-backend/.venv/
+﻿backend/.venv/
 backend/data/
-__pycache__/
-
-# Node.js dependencies
 frontend/node_modules/
-
-# Build output
-frontend/dist/
-frontend/build/
-
-# OS files
-.DS_Store
-Thumbs.db
+__pycache__/

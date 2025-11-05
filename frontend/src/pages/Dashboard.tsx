@@ -18,9 +18,13 @@ export default function Dashboard() {
 
         try {
             setLoading(true);
-            const res = await axios.post("http://127.0.0.1:8000/predict", formData, {
+            const API_BASE =
+                process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+
+            const res = await axios.post(`${API_BASE}/predict`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+
 
             setPrediction(res.data.prediction);
             setHeatmap(`data:image/png;base64,${res.data.heatmap}`);
