@@ -1,35 +1,15 @@
-﻿# Node & React
+﻿# Python venv and data
+backend/.venv/
+backend/data/
+__pycache__/
+
+# Node.js dependencies
 frontend/node_modules/
-frontend/.env
+
+# Build output
+frontend/dist/
 frontend/build/
 
-# Python / FastAPI
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
-instance/
-.env
-*.log
-
-# Virtual environments
-venv/
-.venv/
-env/
-ENV/
-
-# Large data / model files
-backend/data/
-backend/datasets/
-*.pth
-*.pt
-*.tar.gz
-*.h5
-*.ckpt
-
-# OS / IDE files
-.vscode/
-.idea/
+# OS files
 .DS_Store
 Thumbs.db
