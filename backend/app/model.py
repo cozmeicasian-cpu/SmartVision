@@ -12,7 +12,7 @@ CLASSES = ["Abyssinian", "Bengal", "Persian", "Siamese", "Maine Coon"]
 model = models.resnet18(pretrained=False)
 num_features = model.fc.in_features
 model.fc = torch.nn.Linear(num_features, len(CLASSES))
-model.load_state_dict(torch.load("backend/model.pth", map_location="cpu"))
+model.load_state_dict(torch.load("model.pth", map_location="cpu"))
 model.eval()
 
 # ✅ Optional: placeholder heatmap generator
