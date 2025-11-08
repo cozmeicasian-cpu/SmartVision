@@ -5,19 +5,19 @@ import torch
 import torchvision.transforms as transforms
 from torchvision import models
 
-# ✅ Define your class names
+# ✅ Define class names (adjust as needed)
 CLASSES = ["Abyssinian", "Bengal", "Persian", "Siamese", "Maine Coon"]
 
-# ✅ Load your model once (adjust path if necessary)
+# ✅ Load model once
 model = models.resnet18(pretrained=False)
 num_features = model.fc.in_features
 model.fc = torch.nn.Linear(num_features, len(CLASSES))
 model.load_state_dict(torch.load("app/model_weights.pth", map_location="cpu"))
 model.eval()
 
-# ✅ Grad-CAM or heatmap stub (replace if you have your own)
+# ✅ Optional: placeholder heatmap generator
 def generate_heatmap(image):
-    # Dummy placeholder — replace with your Grad-CAM logic if needed
+    # Replace this stub with real Grad-CAM logic later if desired
     return image
 
 # ✅ Main prediction function
@@ -30,19 +30,19 @@ def predict_image(image_bytes):
     ])
     img_tensor = transform(image).unsqueeze(0)
 
-    # 2️⃣ Make prediction
+    # 2️⃣ Predict
     outputs = model(img_tensor)
     probs = torch.nn.functional.softmax(outputs, dim=1)[0].cpu().numpy()
     top3_idx = probs.argsort()[-3:][::-1]
     top3 = [(CLASSES[i], float(probs[i])) for i in top3_idx]
 
-    # 3️⃣ Generate heatmap (optional)
+    # 3️⃣ Heatmap (optional)
     heatmap_img = generate_heatmap(image)
     buffer = io.BytesIO()
     heatmap_img.save(buffer, format="PNG")
     heatmap_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    # 4️⃣ Return structured result
+    # 4️⃣ Return results
     predicted_class, confidence = top3[0]
 
     return {
