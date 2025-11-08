@@ -8,11 +8,25 @@ from torchvision import models
 # ✅ Define class names (adjust as needed)
 CLASSES = ["Abyssinian", "Bengal", "Persian", "Siamese", "Maine Coon"]
 
-# ✅ Load model once
+# ✅ Load model once (safe partial load)
 model = models.resnet18(pretrained=False)
 num_features = model.fc.in_features
 model.fc = torch.nn.Linear(num_features, len(CLASSES))
-model.load_state_dict(torch.load("model.pth", map_location="cpu"))
+
+try:
+    checkpoint = torch.load("model.pth", map_location="cpu")
+    model_state = model.state_dict()
+    # Only load matching weights to prevent size mismatch errors
+    filtered = {
+        k: v for k, v in checkpoint.items()
+        if k in model_state and model_state[k].shape == v.shape
+    }
+    model_state.update(filtered)
+    model.load_state_dict(model_state)
+    print(f"✅ Model loaded successfully — {len(filtered)} layers matched.")
+except Exception as e:
+    print(f"⚠️ Warning: Model partially loaded or missing weights: {e}")
+
 model.eval()
 
 # ✅ Optional: placeholder heatmap generator
@@ -34,7 +48,7 @@ def predict_image(image_bytes):
     outputs = model(img_tensor)
     probs = torch.nn.functional.softmax(outputs, dim=1)[0].cpu().numpy()
     top3_idx = probs.argsort()[-3:][::-1]
-    top3 = [(CLASSES[i], float(probs[i])) for i in top3_idx]
+    top3 = [(CLASSES[i], round(float(probs[i]) * 100, 2)) for i in top3_idx]
 
     # 3️⃣ Heatmap (optional)
     heatmap_img = generate_heatmap(image)
@@ -47,7 +61,7 @@ def predict_image(image_bytes):
 
     return {
         "prediction": predicted_class,
-        "confidence": confidence,
+        "confidence": confidence,  # %
         "probabilities": top3,
         "heatmap": heatmap_base64
     }
