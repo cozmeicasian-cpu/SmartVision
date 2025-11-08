@@ -4,6 +4,10 @@ from app.model import predict_image
 import io
 from PIL import Image
 import base64
+from fastapi.responses import JSONResponse
+
+
+
 
 app = FastAPI()
 

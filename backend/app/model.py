@@ -16,7 +16,8 @@ heatmap_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 predicted_class, confidence = top3[0]  # highest class + probability
 
 def predict_image(image_bytes):
-    # your model prediction steps...
+    # --- your model prediction steps ---
+    outputs = model(img_tensor)
     probs = torch.nn.functional.softmax(outputs, dim=1)[0].cpu().numpy()
     top3_idx = probs.argsort()[-3:][::-1]
     top3 = [(CLASSES[i], float(probs[i])) for i in top3_idx]
@@ -26,12 +27,12 @@ def predict_image(image_bytes):
     heatmap_img.save(buffer, format="PNG")
     heatmap_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    # Identify top prediction and confidence
+    # Get top-1 prediction and confidence
     predicted_class, confidence = top3[0]
 
     return {
         "prediction": predicted_class,
-        "confidence": confidence,
-        "probabilities": top3,
+        "confidence": confidence,  # 👈 this line adds the percentage data
+        "probabilities": top3,     # optional: shows top 3 classes
         "heatmap": heatmap_base64
     }
