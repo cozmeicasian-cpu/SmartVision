@@ -10,6 +10,8 @@ export default function Dashboard() {
     const [probabilities, setProbabilities] = useState<{ name: string; value: number }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+    const [confidence, setConfidence] = useState<number | null>(null);
+
 
     // ✅ Use environment variable with fallback
     const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
@@ -33,6 +35,10 @@ export default function Dashboard() {
 
             setPrediction(res.data.prediction);
             setHeatmap(`data:image/png;base64,${res.data.heatmap}`);
+            if (res.data.confidence) {
+                setConfidence(res.data.confidence);
+            }
+
 
             if (res.data.probabilities) {
                 const chartData = res.data.probabilities.map((p: [string, number]) => ({
@@ -101,13 +107,14 @@ export default function Dashboard() {
                         <div className="flex flex-col items-center space-y-4">
                             <h2 className="text-2xl font-bold text-indigo-400">Prediction</h2>
                             <p className="text-4xl font-semibold">
-                                {prediction}{" "}
-                                {res.data.confidence && (
+                                {prediction}
+                                {confidence !== null && (
                                     <span className="text-lg text-gray-400 ml-2">
-                                        ({(res.data.confidence * 100).toFixed(1)}%)
+                                        ({(confidence * 100).toFixed(1)}%)
                                     </span>
                                 )}
                             </p>
+
 
 
                             {probabilities.length > 0 && (
