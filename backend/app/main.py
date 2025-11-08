@@ -30,3 +30,9 @@ async def predict(file: UploadFile = File(...)):
     heatmap_img.save(buffered, format="PNG")
     heatmap_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
     return {"prediction": prediction, "heatmap": heatmap_b64}
+
+from fastapi.responses import JSONResponse
+
+@app.get("/")
+def root():
+    return JSONResponse({"message": "🚀 SmartVision API is running!"})
