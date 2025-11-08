@@ -9,35 +9,43 @@ export default function Dashboard() {
     const [heatmap, setHeatmap] = useState<string>("");
     const [probabilities, setProbabilities] = useState<{ name: string; value: number }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
+
+    // ✅ Use environment variable with fallback
+    const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
     const handleUpload = async () => {
-        if (!file) return alert("Please upload an image first!");
+        if (!file) {
+            alert("Please upload an image first!");
+            return;
+        }
 
         const formData = new FormData();
         formData.append("file", file);
 
         try {
             setLoading(true);
-            const API_BASE =
-                process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+            setError("");
 
             const res = await axios.post(`${API_BASE}/predict`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-
             setPrediction(res.data.prediction);
             setHeatmap(`data:image/png;base64,${res.data.heatmap}`);
+
             if (res.data.probabilities) {
                 const chartData = res.data.probabilities.map((p: [string, number]) => ({
                     name: p[0],
                     value: Math.round(p[1] * 100),
                 }));
                 setProbabilities(chartData);
+            } else {
+                setProbabilities([]);
             }
-        } catch (err) {
-            alert("Prediction failed. Is the backend running?");
-            console.error(err);
+        } catch (err: any) {
+            console.error("Prediction failed:", err);
+            setError("Prediction failed. Please check if the backend is running or reachable.");
         } finally {
             setLoading(false);
         }
@@ -47,7 +55,7 @@ export default function Dashboard() {
         if (!heatmap) return;
         const link = document.createElement("a");
         link.href = heatmap;
-        link.download = `${prediction}_gradcam.png`;
+        link.download = `${prediction || "heatmap"}_gradcam.png`;
         link.click();
     };
 
@@ -61,7 +69,9 @@ export default function Dashboard() {
         >
             <header className="text-center mb-10">
                 <h1 className="text-4xl font-bold text-indigo-400">🧠 SmartVision Dashboard</h1>
-                <p className="text-gray-400 mt-2">Upload an image to generate a Grad-CAM visualization.</p>
+                <p className="text-gray-400 mt-2">
+                    Upload an image to generate a Grad-CAM visualization.
+                </p>
             </header>
 
             <div className="bg-gray-800 rounded-2xl shadow-xl p-8 w-full max-w-4xl">
@@ -81,6 +91,10 @@ export default function Dashboard() {
                         {loading ? "Predicting..." : "Predict"}
                     </button>
                 </div>
+
+                {error && (
+                    <p className="text-red-400 text-center mt-4">{error}</p>
+                )}
 
                 {prediction && (
                     <div className="mt-8 grid md:grid-cols-2 gap-8">
@@ -104,7 +118,11 @@ export default function Dashboard() {
                             <h2 className="text-2xl font-bold text-indigo-400">Grad-CAM Heatmap</h2>
                             {heatmap ? (
                                 <>
-                                    <img src={heatmap} alt="Grad-CAM heatmap" className="rounded-lg shadow-md" />
+                                    <img
+                                        src={heatmap}
+                                        alt="Grad-CAM heatmap"
+                                        className="rounded-lg shadow-md"
+                                    />
                                     <button
                                         onClick={handleDownload}
                                         className="mt-2 text-sm bg-indigo-600 hover:bg-indigo-700 px-4 py-1 rounded-lg"
