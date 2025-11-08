@@ -100,7 +100,15 @@ export default function Dashboard() {
                     <div className="mt-8 grid md:grid-cols-2 gap-8">
                         <div className="flex flex-col items-center space-y-4">
                             <h2 className="text-2xl font-bold text-indigo-400">Prediction</h2>
-                            <p className="text-4xl font-semibold">{prediction}</p>
+                            <p className="text-4xl font-semibold">
+                                {prediction}{" "}
+                                {res.data.confidence && (
+                                    <span className="text-lg text-gray-400 ml-2">
+                                        ({(res.data.confidence * 100).toFixed(1)}%)
+                                    </span>
+                                )}
+                            </p>
+
 
                             {probabilities.length > 0 && (
                                 <ResponsiveContainer width="100%" height={200}>
@@ -137,7 +145,7 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
-
+            
             <footer className="mt-10 text-gray-500 text-sm">
                 <button
                     onClick={() => (window.location.href = "/")}
