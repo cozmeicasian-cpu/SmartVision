@@ -35,7 +35,6 @@ def generate_heatmap(image):
 
 # ✅ Main prediction function
 def predict_image(image_bytes):
-    # Preprocess image
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -43,20 +42,19 @@ def predict_image(image_bytes):
     ])
     img_tensor = transform(image).unsqueeze(0)
 
-    # Run prediction
-    outputs = model(img_tensor)
-    probs = torch.nn.functional.softmax(outputs, dim=1)[0].cpu().numpy()
+    with torch.no_grad():  # ✅ prevents gradients
+        outputs = model(img_tensor)
+        probs = torch.nn.functional.softmax(outputs, dim=1)[0].cpu().detach().numpy()
+
     top3_idx = probs.argsort()[-3:][::-1]
     top3 = [(CLASSES[i], float(probs[i])) for i in top3_idx]
 
-    # Generate fake heatmap (replace later if needed)
+    predicted_class, confidence = top3[0]
+
     heatmap_img = generate_heatmap(image)
     buffer = io.BytesIO()
     heatmap_img.save(buffer, format="PNG")
     heatmap_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-    # Get top prediction
-    predicted_class, confidence = top3[0]
 
     return {
         "prediction": predicted_class,
