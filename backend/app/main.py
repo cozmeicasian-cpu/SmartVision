@@ -21,13 +21,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    image_bytes = await file.read()
-    # 👇 predict_image now returns a dict (prediction, confidence, heatmap, etc.)
-    result = predict_image(image_bytes)
-    return result
+    try:
+        image_bytes = await file.read()
+        result = predict_image(image_bytes)
+        return result
+    except Exception as e:
+        import traceback
+        print("🔥 Prediction error:", traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
 
 @app.get("/")
 def root():
